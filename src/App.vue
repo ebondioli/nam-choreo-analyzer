@@ -184,11 +184,11 @@ function downloadCSV(result) {
                   </th>
                   <th class="v-data-table__td v-data-table-column--align-center v-data-table__th" colspan="3"
                     rowspan="1">
-                    <div class="v-data-table-header__content"><span>Speed</span></div>
+                    <div class="v-data-table-header__content"><span>Speed (max 80 RPM)</span></div>
                   </th>
                   <th class="v-data-table__td v-data-table-column--align-center v-data-table__th accel-cell" colspan="3"
                     rowspan="1">
-                    <div class="v-data-table-header__content"><span>Acceleration</span></div>
+                    <div class="v-data-table-header__content"><span>Acceleration (max 70 RPM/s)</span></div>
                   </th>
                 </tr>
                 <tr>
