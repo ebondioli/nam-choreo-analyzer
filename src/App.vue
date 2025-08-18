@@ -10,9 +10,10 @@ const headers = [
   {
     title: 'Speed',
     align: 'center',
+    class: "g-speed",
     children: [
       { title: 'Max (RPM)', value: 'maxSpeed' },
-      { title: 'Time (s)', value: 'speedTime' },
+      { title: 'Time', value: 'speedTime' },
       { title: 'Frame', value: 'speedFrame' }
     ]
   },
@@ -21,7 +22,7 @@ const headers = [
     align: 'center',
     children: [
       { title: 'Max (RPM/s)', value: 'maxAccel' },
-      { title: 'Time (s)', value: 'accelTime' },
+      { title: 'Time', value: 'accelTime' },
       { title: 'Frame', value: 'accelFrame' }
     ]
   }
@@ -83,7 +84,7 @@ function calculateStats(framesMap, frames) {
   let maxAccelFrame = 0
 
   for (let i = 1; i < values.length; i++) {
-    const speed = Math.abs((values[i] - values[i-1]) / dt) / 6
+    const speed = Math.abs((values[i] - values[i - 1]) / dt) / 6
     if (speed > maxSpeed) {
       maxSpeed = speed
       maxSpeedFrame = i
@@ -91,7 +92,7 @@ function calculateStats(framesMap, frames) {
   }
 
   for (let i = 2; i < values.length; i++) {
-    const accel = Math.abs((values[i] - 2*values[i-1] + values[i-2]) / (dt*dt)) / 6
+    const accel = Math.abs((values[i] - 2 * values[i - 1] + values[i - 2]) / (dt * dt)) / 6
     if (accel > maxAccel) {
       maxAccel = accel
       maxAccelFrame = i
@@ -109,24 +110,20 @@ function frameToTimestamp(frameNumber) {
   const totalSeconds = frameNumber / fps
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0')
-  return `${minutes}:${seconds}` 
+  return `${minutes}:${seconds}`
 }
 </script>
 
 <template>
   <v-container>
-    <div class="d-flex w-100 justify-space-between align-center"><h1>NAM Choreo Analyzer</h1><img src="/logo.png" width="32" height="32"/></div>
+    <div class="d-flex w-100 justify-space-between align-center">
+      <h1>NAM Choreo Analyzer</h1><img src="/logo.png" width="32" height="32" />
+    </div>
     <p>Select one or multiple .txt files exported from C4D</p>
 
     <v-row class="mt-4">
       <v-col cols="12">
-        <v-file-input
-          label="Select TXT Files"
-          multiple
-          accept=".txt"
-          @change="handleFiles"
-          outlined
-        />
+        <v-file-input label="Select TXT Files" multiple accept=".txt" @change="handleFiles" outlined />
       </v-col>
     </v-row>
 
@@ -135,33 +132,85 @@ function frameToTimestamp(frameNumber) {
         <v-card class="mb-4">
           <v-card-title>{{ result.fileName }}</v-card-title>
           <v-card-text>
-            <v-data-table
-              :headers="headers"
-              :items="result.stats.map((s, i) => ({
-                column: columns[i],
-                maxSpeed: s.maxSpeed,
-                speedTime: frameToTimestamp(s.maxSpeedFrame),
-                speedFrame: s.maxSpeedFrame,
-                maxAccel: s.maxAccel,
-                accelTime: frameToTimestamp(s.maxAccelFrame),
-                accelFrame: s.maxAccelFrame
-              }))"
-              class="elevation-1"
-              dense
-              hide-default-footer
-             
-            >
-              <template #item.maxSpeed="{ item }">
-                <span :class="{'red--text': item.maxSpeed > 80}">
-                  {{ item.maxSpeed.toFixed(2) }}
-                </span>
+            <v-data-table :headers="headers" :items="result.stats.map((s, i) => ({
+              column: columns[i],
+              maxSpeed: s.maxSpeed,
+              speedTime: frameToTimestamp(s.maxSpeedFrame),
+              speedFrame: s.maxSpeedFrame,
+              maxAccel: s.maxAccel,
+              accelTime: frameToTimestamp(s.maxAccelFrame),
+              accelFrame: s.maxAccelFrame
+            }))" class="elevation-1" dense hide-default-footer>
+              <!-- Custom header -->
+              <template #headers>
+                  <tr>
+                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
+                      rowspan="2">
+                      <div class="v-data-table-header__content"><span>Element</span></div>
+                    </th>
+                    <th class="v-data-table__td v-data-table-column--align-center v-data-table__th" colspan="3"
+                      rowspan="1">
+                      <div class="v-data-table-header__content"><span>Speed</span></div>
+                    </th>
+                    <th class="v-data-table__td v-data-table-column--align-center v-data-table__th accel-cell" colspan="3"
+                      rowspan="1">
+                      <div class="v-data-table-header__content"><span>Acceleration</span></div>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
+                      rowspan="1">
+                      <div class="v-data-table-header__content"><span>Max (RPM)</span></div>
+                    </th>
+                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
+                      rowspan="1">
+                      <div class="v-data-table-header__content"><span>Time</span></div>
+                    </th>
+                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
+                      rowspan="1">
+                      <div class="v-data-table-header__content"><span>Frame</span></div>
+                    </th>
+                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
+                      rowspan="1">
+                      <div class="v-data-table-header__content"><span>Max (RPM/s)</span></div>
+                    </th>
+                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
+                      rowspan="1">
+                      <div class="v-data-table-header__content"><span>Time</span></div>
+                    </th>
+                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
+                      rowspan="1">
+                      <div class="v-data-table-header__content"><span>Frame</span></div>
+                    </th>
+                  </tr>
               </template>
-              <template #item.maxAccel="{ item }">
-                <span :class="{'red--text': item.maxAccel > 70}">
-                  {{ item.maxAccel.toFixed(2) }}
-                </span>
+
+              <!-- Custom row rendering -->
+              <template #item="{ item }">
+                <tr>
+                  <td>{{ item.column }}</td>
+
+                  <!-- Speed group -->
+                  <td class="speed-cell">
+                    <span :class="{ 'red--text': item.maxSpeed > 80 }">
+                      {{ item.maxSpeed.toFixed(2) }}
+                    </span>
+                  </td>
+                  <td class="speed-cell">{{ item.speedTime }}</td>
+                  <td class="speed-cell">{{ item.speedFrame }}</td>
+
+                  <!-- Accel group -->
+                  <td class="accel-cell">
+                    <span :class="{ 'red--text': item.maxAccel > 70 }">
+                      {{ item.maxAccel.toFixed(2) }}
+                    </span>
+                  </td>
+                  <td class="accel-cell">{{ item.accelTime }}</td>
+                  <td class="accel-cell">{{ item.accelFrame }}</td>
+                </tr>
               </template>
             </v-data-table>
+
           </v-card-text>
         </v-card>
       </v-col>
@@ -172,5 +221,9 @@ function frameToTimestamp(frameNumber) {
 <style scoped>
 .red--text {
   color: red !important;
+}
+
+.accel-cell {
+  background-color: #1e1e1e;
 }
 </style>
