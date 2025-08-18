@@ -52,6 +52,8 @@ function handleFiles(event) {
         fileName: file.name,
         stats
       })
+
+      results.value.sort((a, b) => a.fileName.localeCompare(b.fileName))
     }
     reader.readAsText(file)
   })
