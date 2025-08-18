@@ -50,7 +50,9 @@ function handleFiles(event) {
 
       results.value.push({
         fileName: file.name,
-        stats
+        stats,
+        frames,
+        maps: { rotStructure, rotLeftArm, rotRightArm }
       })
 
       results.value.sort((a, b) => a.fileName.localeCompare(b.fileName))
@@ -114,6 +116,34 @@ function frameToTimestamp(frameNumber) {
   const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0')
   return `${minutes}:${seconds}`
 }
+
+function downloadCSV(result) {
+  const { fileName, frames, maps } = result
+  const { rotStructure, rotLeftArm, rotRightArm } = maps
+
+  // header row
+  const rows = [["0", "1", "2"]]
+
+  // collect rows
+  frames.forEach(frame => {
+    rows.push([
+      rotStructure.get(frame) ?? 0,
+      rotLeftArm.get(frame) ?? 0,
+      rotRightArm.get(frame) ?? 0
+    ])
+  })
+
+  // convert to CSV text
+  const csvContent = rows.map(r => r.join(",")).join("\n")
+
+  // trigger download
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+  const link = document.createElement("a")
+  link.href = URL.createObjectURL(blob)
+  link.download = fileName.replace(/\.txt$/i, "") + ".csv"
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
 </script>
 
 <template>
@@ -132,7 +162,9 @@ function frameToTimestamp(frameNumber) {
     <v-row v-if="results.length">
       <v-col cols="12" v-for="result in results" :key="result.fileName">
         <v-card class="mb-4">
-          <v-card-title>{{ result.fileName }}</v-card-title>
+          <v-card-title class="d-flex w-100 justify-space-between align-center">{{ result.fileName }} <v-btn small color="primary" @click="downloadCSV(result)">
+              Download CSV
+            </v-btn></v-card-title>
           <v-card-text>
             <v-data-table :headers="headers" :items="result.stats.map((s, i) => ({
               column: columns[i],
@@ -145,46 +177,46 @@ function frameToTimestamp(frameNumber) {
             }))" class="elevation-1" dense hide-default-footer>
               <!-- Custom header -->
               <template #headers>
-                  <tr>
-                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
-                      rowspan="2">
-                      <div class="v-data-table-header__content"><span>Element</span></div>
-                    </th>
-                    <th class="v-data-table__td v-data-table-column--align-center v-data-table__th" colspan="3"
-                      rowspan="1">
-                      <div class="v-data-table-header__content"><span>Speed</span></div>
-                    </th>
-                    <th class="v-data-table__td v-data-table-column--align-center v-data-table__th accel-cell" colspan="3"
-                      rowspan="1">
-                      <div class="v-data-table-header__content"><span>Acceleration</span></div>
-                    </th>
-                  </tr>
-                  <tr>
-                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
-                      rowspan="1">
-                      <div class="v-data-table-header__content"><span>Max (RPM)</span></div>
-                    </th>
-                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
-                      rowspan="1">
-                      <div class="v-data-table-header__content"><span>Time</span></div>
-                    </th>
-                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
-                      rowspan="1">
-                      <div class="v-data-table-header__content"><span>Frame</span></div>
-                    </th>
-                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
-                      rowspan="1">
-                      <div class="v-data-table-header__content"><span>Max (RPM/s)</span></div>
-                    </th>
-                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
-                      rowspan="1">
-                      <div class="v-data-table-header__content"><span>Time</span></div>
-                    </th>
-                    <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
-                      rowspan="1">
-                      <div class="v-data-table-header__content"><span>Frame</span></div>
-                    </th>
-                  </tr>
+                <tr>
+                  <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
+                    rowspan="2">
+                    <div class="v-data-table-header__content"><span>Element</span></div>
+                  </th>
+                  <th class="v-data-table__td v-data-table-column--align-center v-data-table__th" colspan="3"
+                    rowspan="1">
+                    <div class="v-data-table-header__content"><span>Speed</span></div>
+                  </th>
+                  <th class="v-data-table__td v-data-table-column--align-center v-data-table__th accel-cell" colspan="3"
+                    rowspan="1">
+                    <div class="v-data-table-header__content"><span>Acceleration</span></div>
+                  </th>
+                </tr>
+                <tr>
+                  <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
+                    rowspan="1">
+                    <div class="v-data-table-header__content"><span>Max (RPM)</span></div>
+                  </th>
+                  <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
+                    rowspan="1">
+                    <div class="v-data-table-header__content"><span>Time</span></div>
+                  </th>
+                  <th class="v-data-table__td v-data-table-column--align-start v-data-table__th" colspan="1"
+                    rowspan="1">
+                    <div class="v-data-table-header__content"><span>Frame</span></div>
+                  </th>
+                  <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
+                    rowspan="1">
+                    <div class="v-data-table-header__content"><span>Max (RPM/s)</span></div>
+                  </th>
+                  <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
+                    rowspan="1">
+                    <div class="v-data-table-header__content"><span>Time</span></div>
+                  </th>
+                  <th class="v-data-table__td v-data-table-column--align-start v-data-table__th accel-cell" colspan="1"
+                    rowspan="1">
+                    <div class="v-data-table-header__content"><span>Frame</span></div>
+                  </th>
+                </tr>
               </template>
 
               <!-- Custom row rendering -->
