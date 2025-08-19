@@ -14,10 +14,10 @@ const dialog = ref(false)
 const dialogData = ref({ column: "", type: "", frames: [] })
 
 function openDialog(column, type, frames) {
-  dialogData.value = { 
-    column, 
-    type, 
-    frames: groupFramesIntoIntervals(frames) 
+  dialogData.value = {
+    column,
+    type,
+    frames: groupFramesIntoIntervals(frames)
   }
   dialog.value = true
 }
@@ -31,22 +31,17 @@ function openDialog(column, type, frames) {
     </v-card-title>
 
     <v-card-text>
-      <v-data-table
-        :items="result.stats.map((s, i) => ({
-          column: columns[i],
-          maxSpeed: s.maxSpeed,
-          speedTime: frameToTimestamp(s.maxSpeedFrame),
-          speedFrame: s.maxSpeedFrame,
-          exceededSpeedFrames: s.exceededSpeedFrames,
-          maxAccel: s.maxAccel,
-          accelTime: frameToTimestamp(s.maxAccelFrame),
-          accelFrame: s.maxAccelFrame,
-          exceededAccelFrames: s.exceededAccelFrames
-        }))"
-        class="elevation-1"
-        dense
-        hide-default-footer
-      >
+      <v-data-table :items="result.stats.map((s, i) => ({
+        column: columns[i],
+        maxSpeed: s.maxSpeed,
+        speedTime: frameToTimestamp(s.maxSpeedFrame),
+        speedFrame: s.maxSpeedFrame,
+        exceededSpeedFrames: s.exceededSpeedFrames,
+        maxAccel: s.maxAccel,
+        accelTime: frameToTimestamp(s.maxAccelFrame),
+        accelFrame: s.maxAccelFrame,
+        exceededAccelFrames: s.exceededAccelFrames
+      }))" class="elevation-1" dense hide-default-footer>
         <!-- Custom headers (same as your original code) -->
         <template #headers>
           <tr>
@@ -61,12 +56,24 @@ function openDialog(column, type, frames) {
             </th>
           </tr>
           <tr>
-            <th><div class="v-data-table-header__content"><span>Max (RPM)</span></div></th>
-            <th><div class="v-data-table-header__content"><span>Time</span></div></th>
-            <th><div class="v-data-table-header__content"><span>Frame</span></div></th>
-            <th class="accel-cell"><div class="v-data-table-header__content"><span>Max (RPM/s)</span></div></th>
-            <th class="accel-cell"><div class="v-data-table-header__content"><span>Time</span></div></th>
-            <th class="accel-cell"><div class="v-data-table-header__content"><span>Frame</span></div></th>
+            <th>
+              <div class="v-data-table-header__content"><span>Max (RPM)</span></div>
+            </th>
+            <th>
+              <div class="v-data-table-header__content"><span>Time</span></div>
+            </th>
+            <th>
+              <div class="v-data-table-header__content"><span>Frame</span></div>
+            </th>
+            <th class="accel-cell">
+              <div class="v-data-table-header__content"><span>Max (RPM/s)</span></div>
+            </th>
+            <th class="accel-cell">
+              <div class="v-data-table-header__content"><span>Time</span></div>
+            </th>
+            <th class="accel-cell">
+              <div class="v-data-table-header__content"><span>Frame</span></div>
+            </th>
           </tr>
         </template>
 
@@ -82,11 +89,7 @@ function openDialog(column, type, frames) {
             </td>
             <td>{{ item.speedTime }}</td>
             <td>
-              <v-btn
-                small
-                text
-                @click="openDialog(item.column, 'Speed', item.exceededSpeedFrames)"
-              >
+              <v-btn small text @click="openDialog(item.column, 'speed', item.exceededSpeedFrames)">
                 {{ item.speedFrame }}
               </v-btn>
             </td>
@@ -98,11 +101,7 @@ function openDialog(column, type, frames) {
             </td>
             <td class="accel-cell">{{ item.accelTime }}</td>
             <td class="accel-cell">
-              <v-btn
-                small
-                text
-                @click="openDialog(item.column, 'Acceleration', item.exceededAccelFrames)"
-              >
+              <v-btn small text @click="openDialog(item.column, 'acceleration', item.exceededAccelFrames)">
                 {{ item.accelFrame }}
               </v-btn>
             </td>
@@ -111,7 +110,7 @@ function openDialog(column, type, frames) {
       </v-data-table>
     </v-card-text>
 
-    <ExceededDialog v-model="dialog" :dialogData="dialogData" />
+    <ExceededDialog v-model="dialog" :dialogData="dialogData" :unit="dialogData.type === 'speed' ? 'RPM' : 'RPM/s'" />
   </v-card>
 </template>
 

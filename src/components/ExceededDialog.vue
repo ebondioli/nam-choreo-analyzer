@@ -1,9 +1,10 @@
 <script setup>
 import { frameToTimestamp } from '../utils/stats.js'
 
-defineProps({
+const props = defineProps({
     modelValue: Boolean,
-    dialogData: Object
+    dialogData: Object,
+    unit: String
 })
 defineEmits(['update:modelValue'])
 </script>
@@ -19,12 +20,12 @@ defineEmits(['update:modelValue'])
                     <v-list-item v-for="(interval, idx) in dialogData.frames" :key="idx">
                         <template v-if="interval[0] === interval[1]">
                             Frame {{ interval[0] }} ({{ frameToTimestamp(interval[0]) }}) — <span class="red--text"> {{
-                                interval[2].toFixed(2) }} RPM</span>
+                                interval[2].toFixed(2) }} {{props.unit}}</span>
                         </template>
                         <template v-else>
                             Frames {{ interval[0] }} - {{ interval[1] }}
                             ({{ frameToTimestamp(interval[0]) }} → {{ frameToTimestamp(interval[1]) }})
-                            — <span class="red--text">{{ interval[2].toFixed(2) }} RPM</span>
+                            — <span class="red--text">{{ interval[2].toFixed(2) }} {{props.unit}}</span>
                         </template>
                     </v-list-item>
                 </v-list>
