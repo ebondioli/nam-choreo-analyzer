@@ -56,11 +56,8 @@ function handleFiles(event) {
     <p>Select one or multiple .txt files exported from C4D</p>
 
     <v-row class="mt-4">
-      <v-col cols="12" md="8">
+      <v-col cols="12" md="12">
         <v-file-input label="Select TXT Files" multiple accept=".txt" @change="handleFiles" outlined />
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-text-field v-model.number="exportFPS" type="number" label="CSV Export FPS" min="1" outlined />
       </v-col>
     </v-row>
 
