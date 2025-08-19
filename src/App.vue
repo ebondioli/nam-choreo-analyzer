@@ -28,6 +28,13 @@ const headers = [
   }
 ]
 
+// limits for each module
+const limits = {
+  Rotation: { speed: 80, accel: 70 },
+  'Left Arm': { speed: 800, accel: 200 },
+  'Right Arm': { speed: 800, accel: 200 }
+}
+
 function handleFiles(event) {
   results.value = []
 
@@ -184,11 +191,11 @@ function downloadCSV(result) {
                   </th>
                   <th class="v-data-table__td v-data-table-column--align-center v-data-table__th" colspan="3"
                     rowspan="1">
-                    <div class="v-data-table-header__content"><span>Speed (max 80 RPM)</span></div>
+                    <div class="v-data-table-header__content"><span>Speed</span></div>
                   </th>
                   <th class="v-data-table__td v-data-table-column--align-center v-data-table__th accel-cell" colspan="3"
                     rowspan="1">
-                    <div class="v-data-table-header__content"><span>Acceleration (max 70 RPM/s)</span></div>
+                    <div class="v-data-table-header__content"><span>Acceleration</span></div>
                   </th>
                 </tr>
                 <tr>
@@ -220,27 +227,33 @@ function downloadCSV(result) {
               </template>
 
               <!-- Custom row rendering -->
-              <template #item="{ item }">
+               <template #item="{ item }">
                 <tr>
                   <td>{{ item.column }}</td>
 
-                  <!-- Speed group -->
-                  <td class="speed-cell">
-                    <span :class="{ 'red--text': item.maxSpeed > 80 }">
+                  <!-- Speed -->
+                  <td>
+                    <span :class="{ 'red--text': item.maxSpeed > limits[item.column].speed }">
                       {{ item.maxSpeed.toFixed(2) }}
+                      <template v-if="item.maxSpeed > limits[item.column].speed">
+                        (over {{ limits[item.column].speed }} RPM)
+                      </template>
                     </span>
                   </td>
-                  <td class="speed-cell">{{ item.speedTime }}</td>
-                  <td class="speed-cell">{{ item.speedFrame }}</td>
+                  <td>{{ item.speedTime }}</td>
+                  <td>{{ item.speedFrame }}</td>
 
-                  <!-- Accel group -->
-                  <td class="accel-cell">
-                    <span :class="{ 'red--text': item.maxAccel > 70 }">
+                  <!-- Accel -->
+                  <td>
+                    <span :class="{ 'red--text': item.maxAccel > limits[item.column].accel }">
                       {{ item.maxAccel.toFixed(2) }}
+                      <template v-if="item.maxAccel > limits[item.column].accel">
+                        (over {{ limits[item.column].accel }} RPM/s)
+                      </template>
                     </span>
                   </td>
-                  <td class="accel-cell">{{ item.accelTime }}</td>
-                  <td class="accel-cell">{{ item.accelFrame }}</td>
+                  <td>{{ item.accelTime }}</td>
+                  <td>{{ item.accelFrame }}</td>
                 </tr>
               </template>
             </v-data-table>
