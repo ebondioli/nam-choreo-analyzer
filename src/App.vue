@@ -28,6 +28,10 @@ const headers = [
   }
 ]
 
+// State for modal
+const dialog = ref(false)
+const dialogData = ref({ column: "", type: "", frames: [] })
+
 // limits for each module
 const limits = {
   Rotation: { speed: 80, accel: 70 },
@@ -52,8 +56,11 @@ function handleFiles(event) {
       }
 
       const frames = Array.from(rotStructure.keys()).sort((a, b) => a - b)
-      const columnsMap = [rotStructure, rotLeftArm, rotRightArm]
-      const stats = columnsMap.map(col => calculateStats(col, frames))
+      const maps = [rotStructure, rotLeftArm, rotRightArm]
+
+      const stats = maps.map((col, i) =>
+        calculateStats(col, frames, columns[i])
+      )
 
       results.value.push({
         fileName: file.name,
@@ -85,20 +92,27 @@ function parseSection(data, sectionName) {
   return frames
 }
 
-function calculateStats(framesMap, frames) {
+function calculateStats(framesMap, frames, column) {
   const values = frames.map(f => framesMap.get(f) ?? 0)
   const dt = 1 / fps
+  const limit = limits[column]
 
   let maxSpeed = 0
   let maxAccel = 0
   let maxSpeedFrame = 0
   let maxAccelFrame = 0
 
+  let exceededSpeedFrames = []
+  let exceededAccelFrames = []
+
   for (let i = 1; i < values.length; i++) {
     const speed = Math.abs((values[i] - values[i - 1]) / dt) / 6
     if (speed > maxSpeed) {
       maxSpeed = speed
       maxSpeedFrame = i
+    }
+    if (speed > limit.speed) {
+      exceededSpeedFrames.push(i)
     }
   }
 
@@ -108,9 +122,12 @@ function calculateStats(framesMap, frames) {
       maxAccel = accel
       maxAccelFrame = i
     }
+    if (accel > limit.accel) {
+      exceededAccelFrames.push(i)
+    }
   }
 
-  return { maxSpeed, maxAccel, maxSpeedFrame, maxAccelFrame }
+  return { maxSpeed, maxAccel, maxSpeedFrame, maxAccelFrame, exceededSpeedFrames, exceededAccelFrames }
 }
 
 function frameToTime(frameNumber) {
@@ -151,6 +168,37 @@ function downloadCSV(result) {
   link.click()
   URL.revokeObjectURL(link.href)
 }
+
+function openDialog(column, type, frames) {
+  dialogData.value = {
+    column,
+    type,
+    frames: groupFramesIntoIntervals(frames)
+  }
+  dialog.value = true
+}
+
+function groupFramesIntoIntervals(frames) {
+  if (!frames.length) return []
+  const sorted = [...frames].sort((a, b) => a - b)
+  const intervals = []
+  let start = sorted[0]
+  let prev = sorted[0]
+
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === prev + 1) {
+      // still contiguous
+      prev = sorted[i]
+    } else {
+      // interval ended
+      intervals.push([start, prev])
+      start = sorted[i]
+      prev = sorted[i]
+    }
+  }
+  intervals.push([start, prev])
+  return intervals
+}
 </script>
 
 <template>
@@ -169,7 +217,8 @@ function downloadCSV(result) {
     <v-row v-if="results.length">
       <v-col cols="12" v-for="result in results" :key="result.fileName">
         <v-card class="mb-4">
-          <v-card-title class="d-flex w-100 justify-space-between align-center">{{ result.fileName }} <v-btn small color="primary" @click="downloadCSV(result)">
+          <v-card-title class="d-flex w-100 justify-space-between align-center">{{ result.fileName }} <v-btn small
+              color="primary" @click="downloadCSV(result)">
               Download CSV
             </v-btn></v-card-title>
           <v-card-text>
@@ -178,9 +227,11 @@ function downloadCSV(result) {
               maxSpeed: s.maxSpeed,
               speedTime: frameToTimestamp(s.maxSpeedFrame),
               speedFrame: s.maxSpeedFrame,
+              exceededSpeedFrames: s.exceededSpeedFrames,
               maxAccel: s.maxAccel,
               accelTime: frameToTimestamp(s.maxAccelFrame),
-              accelFrame: s.maxAccelFrame
+              accelFrame: s.maxAccelFrame,
+              exceededAccelFrames: s.exceededAccelFrames
             }))" class="elevation-1" dense hide-default-footer>
               <!-- Custom header -->
               <template #headers>
@@ -227,33 +278,33 @@ function downloadCSV(result) {
               </template>
 
               <!-- Custom row rendering -->
-               <template #item="{ item }">
+              <template #item="{ item }">
                 <tr>
                   <td>{{ item.column }}</td>
-
-                  <!-- Speed -->
                   <td>
                     <span :class="{ 'red--text': item.maxSpeed > limits[item.column].speed }">
                       {{ item.maxSpeed.toFixed(2) }}
-                      <template v-if="item.maxSpeed > limits[item.column].speed">
-                        (over {{ limits[item.column].speed }} RPM)
-                      </template>
+                      <span v-if="item.maxSpeed > limits[item.column].speed"> ({{ limits[item.column].speed }})</span>
                     </span>
                   </td>
                   <td>{{ item.speedTime }}</td>
-                  <td>{{ item.speedFrame }}</td>
-
-                  <!-- Accel -->
+                  <td>
+                    <v-btn small text @click="openDialog(item.column, 'Speed', item.exceededSpeedFrames)">
+                      {{ item.speedFrame }}
+                    </v-btn>
+                  </td>
                   <td>
                     <span :class="{ 'red--text': item.maxAccel > limits[item.column].accel }">
                       {{ item.maxAccel.toFixed(2) }}
-                      <template v-if="item.maxAccel > limits[item.column].accel">
-                        (over {{ limits[item.column].accel }} RPM/s)
-                      </template>
+                      <span v-if="item.maxAccel > limits[item.column].accel"> ({{ limits[item.column].accel }})</span>
                     </span>
                   </td>
                   <td>{{ item.accelTime }}</td>
-                  <td>{{ item.accelFrame }}</td>
+                  <td>
+                    <v-btn small text @click="openDialog(item.column, 'Acceleration', item.exceededAccelFrames)">
+                      {{ item.accelFrame }}
+                    </v-btn>
+                  </td>
                 </tr>
               </template>
             </v-data-table>
@@ -262,6 +313,35 @@ function downloadCSV(result) {
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Dialog -->
+    <v-dialog v-model="dialog" max-width="500">
+      <v-card>
+        <v-card-title>
+          {{ dialogData.column }} - {{ dialogData.type }} Exceeded Frames
+        </v-card-title>
+        <v-card-text>
+          <v-list v-if="dialogData.frames.length">
+            <v-list v-if="dialogData.frames.length">
+              <v-list-item v-for="(interval, idx) in dialogData.frames" :key="idx">
+                <template v-if="interval[0] === interval[1]">
+                  Frame {{ interval[0] }} ({{ frameToTimestamp(interval[0]) }})
+                </template>
+                <template v-else>
+                  Frames {{ interval[0] }} - {{ interval[1] }}
+                  ({{ frameToTimestamp(interval[0]) }} → {{ frameToTimestamp(interval[1]) }})
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-list>
+          <div v-else>No frames exceeded the limit</div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text @click="dialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
