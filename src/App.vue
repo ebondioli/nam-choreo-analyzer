@@ -60,19 +60,13 @@ function handleFiles(event) {
         <v-file-input label="Select TXT Files" multiple accept=".txt" @change="handleFiles" outlined />
       </v-col>
       <v-col cols="12" md="4">
-        <v-text-field
-          v-model.number="exportFPS"
-          type="number"
-          label="CSV Export FPS"
-          min="1"
-          outlined
-        />
+        <v-text-field v-model.number="exportFPS" type="number" label="CSV Export FPS" min="1" outlined />
       </v-col>
     </v-row>
 
     <v-row v-if="results.length">
       <v-col cols="12" v-for="result in results" :key="result.fileName">
-        <ResultTable :result="result" :columns="columns" :limits="limits" :fps="exportFPS" />
+        <ResultTable :result="result" :columns="columns" :limits="limits" />
       </v-col>
     </v-row>
   </v-container>

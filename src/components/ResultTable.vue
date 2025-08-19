@@ -7,8 +7,7 @@ import ExceededDialog from './ExceededDialog.vue'
 const props = defineProps({
   result: Object,
   columns: Array,
-  limits: Object,
-  fps: Number
+  limits: Object
 })
 
 const dialog = ref(false)
@@ -28,7 +27,7 @@ function openDialog(column, type, frames) {
   <v-card class="mb-4">
     <v-card-title class="d-flex w-100 justify-space-between align-center">
       {{ result.fileName }}
-      <v-btn small color="primary" @click="downloadCSV(result, fps)">Download CSV</v-btn>
+      <v-btn small color="primary" @click="downloadCSV(result)">Download CSV</v-btn>
     </v-card-title>
 
     <v-card-text>
