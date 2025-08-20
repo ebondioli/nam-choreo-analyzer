@@ -5,7 +5,7 @@ import { createVuetify } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
 import './style.css'
-
+import store from './store'
 
 const vuetify = createVuetify({
     theme: {
@@ -20,4 +20,4 @@ const vuetify = createVuetify({
     },
 })
 
-createApp(App).use(vuetify).mount('#app')
+createApp(App).use(vuetify).use(store).mount('#app')

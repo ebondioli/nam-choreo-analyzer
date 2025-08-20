@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { downloadCSV } from '../utils/download'
 import { frameToTimestamp, groupFramesIntoIntervals } from '../utils/stats'
 import ExceededDialog from './ExceededDialog.vue'
+import MappingDialog from './MappingDialog.vue'
 
 const props = defineProps({
   result: Object,
@@ -10,24 +11,45 @@ const props = defineProps({
   limits: Object
 })
 
-const dialog = ref(false)
-const dialogData = ref({ column: "", type: "", frames: [] })
+const limitsDialog = ref(false)
+const limitsDialogData = ref({ column: "", type: "", frames: [] })
 
-function openDialog(column, type, frames) {
-  dialogData.value = {
+const mappingDialog = ref(false)
+const mappingDialogData = ref(null)
+
+function openLimitsDialog(column, type, frames) {
+  limitsDialogData.value = {
     column,
     type,
     frames: groupFramesIntoIntervals(frames)
   }
-  dialog.value = true
+  limitsDialog.value = true
+}
+
+function openMappingDialog(result) {
+  mappingDialogData.value = result
+  mappingDialog.value = true
 }
 </script>
 
 <template>
   <v-card class="mb-4">
-    <v-card-title class="d-flex w-100 justify-space-between align-center">
-      {{ result.fileName }}
-      <v-btn small color="primary" @click="downloadCSV(result)">Download CSV</v-btn>
+    <v-card-title class="d-flex w-100 justify-space-between">
+      <div class="mt-2">
+        {{ result.fileName }}
+      </div>
+      <div>
+        <div class="text-caption d-flex justify-end align-center mb-1">
+          Assigned to: <v-chip class="ml-1" size="small" :color="module < 0 ? 'secondary' : 'primary'"
+            v-for="module in $store.state.mapping[result.fileName]">{{ Math.abs(module) }}</v-chip>
+        </div>
+        <div class="text-caption d-flex justify-end align-center">
+          <v-btn small prepend-icon="mdi-download" color="secondary" class="mr-2"
+            @click="downloadCSV(result)">CSV</v-btn>
+          <v-btn small prepend-icon="mdi-format-list-checks" color="primary" @click="openMappingDialog(result)">Assign
+            Modules</v-btn>
+        </div>
+      </div>
     </v-card-title>
 
     <v-card-text>
@@ -89,7 +111,7 @@ function openDialog(column, type, frames) {
             </td>
             <td>{{ item.speedTime }}</td>
             <td>
-              <v-btn small text @click="openDialog(item.column, 'speed', item.exceededSpeedFrames)">
+              <v-btn small text @click="openLimitsDialog(item.column, 'speed', item.exceededSpeedFrames)">
                 {{ item.speedFrame }}
               </v-btn>
             </td>
@@ -101,7 +123,7 @@ function openDialog(column, type, frames) {
             </td>
             <td class="accel-cell">{{ item.accelTime }}</td>
             <td class="accel-cell">
-              <v-btn small text @click="openDialog(item.column, 'acceleration', item.exceededAccelFrames)">
+              <v-btn small text @click="openLimitsDialog(item.column, 'acceleration', item.exceededAccelFrames)">
                 {{ item.accelFrame }}
               </v-btn>
             </td>
@@ -110,7 +132,9 @@ function openDialog(column, type, frames) {
       </v-data-table>
     </v-card-text>
 
-    <ExceededDialog v-model="dialog" :dialogData="dialogData" :unit="dialogData.type === 'speed' ? 'RPM' : 'RPM/s'" />
+    <ExceededDialog v-model="limitsDialog" :dialogData="limitsDialogData"
+      :unit="limitsDialogData.type === 'speed' ? 'RPM' : 'RPM/s'" />
+    <MappingDialog v-model="mappingDialog" :dialogData="mappingDialogData" />
   </v-card>
 </template>
 
