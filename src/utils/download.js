@@ -30,10 +30,10 @@ export function downloadCSV(result) {
 
     const rows = interpolateFrames(frames, (f, i, prev) => {
         if (i === 0) {
-            return [rot.get(f) ?? 0, left.get(f) ?? 0, right.get(f) ?? 0]
+            return [(rot.get(f) ?? 0) * -1, left.get(f) ?? 0, right.get(f) ?? 0]
         }
         return [
-            (rot.get(f) + rot.get(prev)) / 2,
+            (rot.get(f) + rot.get(prev)) / -2,
             (left.get(f) + left.get(prev)) / 2,
             (right.get(f) + right.get(prev)) / -2,
         ]
@@ -72,15 +72,15 @@ export function createFullChoreography(results, mapping) {
             let result = []
             if (i === 0) {
                 result = [
-                    (rot.get(f) ?? 0) * mult,
+                    (rot.get(f) ?? 0) * -1 * mult,
                     (left.get(f) ?? 0),
                     (right.get(f) ?? 0) * -1,
                 ]
             } else {
                 result = [
-                    ((rot.get(f) ?? 0) + (rot.get(prev) ?? 0)) * mult,
-                    ((left.get(f) ?? 0) + (left.get(prev) ?? 0)),
-                    ((right.get(f) ?? 0) + (right.get(prev) ?? 0)) * -1,
+                    ((rot.get(f) ?? 0) + (rot.get(prev) ?? 0)) / 2 * -1 * mult,
+                    ((left.get(f) ?? 0) + (left.get(prev) ?? 0)) / 2,
+                    ((right.get(f) ?? 0) + (right.get(prev) ?? 0)) / 2 * -1,
                 ]
             }
 
