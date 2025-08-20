@@ -56,7 +56,7 @@ function getState(id) {
     <v-dialog :model-value="modelValue" max-width="500" @update:modelValue="$emit('update:modelValue', $event)">
         <v-card>
             <v-card-title class="text-center">
-                Assign Choreo To Modules
+                Assign <span class="text-primary">{{dialogData.fileName}}</span> To Modules
             </v-card-title>
             <v-card-text>
                 <div class="d-flex justify-center mb-4 pb-4 border-b-thin">

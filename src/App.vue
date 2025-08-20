@@ -42,7 +42,7 @@ function handleFiles(event) {
         calculateStats(maps[col], frames, col, limits)
       )
 
-      results.value.push({ fileName: file.name, stats, frames, maps })
+      results.value.push({ fileName: file.name.split('.txt').join(''), stats, frames, maps })
       results.value.sort((a, b) => a.fileName.localeCompare(b.fileName))
       store.commit('SET_RESULTS', results.value)
       const mapping = {}
