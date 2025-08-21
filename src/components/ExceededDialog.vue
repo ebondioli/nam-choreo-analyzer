@@ -4,13 +4,14 @@ import { frameToTimestamp } from '../utils/stats.js'
 const props = defineProps({
     modelValue: Boolean,
     dialogData: Object,
-    unit: String
+    unit: String,
+    limits: Object
 })
 defineEmits(['update:modelValue'])
 </script>
 
 <template>
-    <v-dialog :model-value="modelValue" max-width="500" @update:modelValue="$emit('update:modelValue', $event)">
+    <v-dialog :model-value="modelValue" max-width="650" @update:modelValue="$emit('update:modelValue', $event)">
         <v-card>
             <v-card-title>
                 {{ dialogData.column }} - {{ dialogData.type }} Exceeded Frames
@@ -20,12 +21,12 @@ defineEmits(['update:modelValue'])
                     <v-list-item v-for="(interval, idx) in dialogData.frames" :key="idx">
                         <template v-if="interval[0] === interval[1]">
                             Frame {{ interval[0] }} ({{ frameToTimestamp(interval[0]) }}) — <span class="red--text"> {{
-                                interval[2].toFixed(2) }} {{props.unit}}</span>
+                                interval[2].toFixed(2) }} {{unit}}</span> (max {{ limits.speed || limits.accel }} {{unit}})
                         </template>
                         <template v-else>
                             Frames {{ interval[0] }} - {{ interval[1] }}
                             ({{ frameToTimestamp(interval[0]) }} → {{ frameToTimestamp(interval[1]) }})
-                            — <span class="red--text">{{ interval[2].toFixed(2) }} {{props.unit}}</span>
+                            — <span class="red--text">{{ interval[2].toFixed(2) }} {{unit}}</span> (max {{ limits.speed || limits.accel }} {{unit}})
                         </template>
                     </v-list-item>
                 </v-list>

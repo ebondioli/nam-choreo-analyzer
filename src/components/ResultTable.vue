@@ -106,8 +106,8 @@ function openMappingDialog(result) {
             <td>
               <span :class="{ 'red--text': item.maxSpeed > limits[item.column].speed }">
                 {{ item.maxSpeed.toFixed(2) }}
-                <span v-if="item.maxSpeed > limits[item.column].speed"> ({{ limits[item.column].speed }})</span>
               </span>
+              <span v-if="item.maxSpeed > limits[item.column].speed"> (max {{ limits[item.column].speed }})</span>
             </td>
             <td>{{ item.speedTime }}</td>
             <td>
@@ -118,8 +118,8 @@ function openMappingDialog(result) {
             <td class="accel-cell">
               <span :class="{ 'red--text': item.maxAccel > limits[item.column].accel }">
                 {{ item.maxAccel.toFixed(2) }}
-                <span v-if="item.maxAccel > limits[item.column].accel"> ({{ limits[item.column].accel }})</span>
               </span>
+              <span v-if="item.maxAccel > limits[item.column].accel"> (max {{ limits[item.column].accel }})</span>
             </td>
             <td class="accel-cell">{{ item.accelTime }}</td>
             <td class="accel-cell">
@@ -133,7 +133,7 @@ function openMappingDialog(result) {
     </v-card-text>
 
     <ExceededDialog v-model="limitsDialog" :dialogData="limitsDialogData"
-      :unit="limitsDialogData.type === 'speed' ? 'RPM' : 'RPM/s'" />
+      :unit="limitsDialogData.type === 'speed' ? 'RPM' : 'RPM/s'" :limits="limits[limitsDialogData.column]" />
     <MappingDialog v-model="mappingDialog" :dialogData="mappingDialogData" />
   </v-card>
 </template>
