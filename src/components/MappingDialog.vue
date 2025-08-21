@@ -25,24 +25,37 @@ watch(() => props.modelValue, val => {
     })
 })
 
+const useMirroring = false
+
 function toggleModule(id) {
     const file = props.dialogData.fileName
     const mapping = { ...store.state.mapping }
     const list = mapping[file] || []
 
-    if (list.includes(id)) {
-        // currently active → turn into mirrored
-        mapping[file] = list.map(mid => mid === id ? -id : mid)
-    } else if (list.includes(-id)) {
-        // currently mirrored → remove (none)
-        mapping[file] = list.filter(mid => mid !== -id)
+    if (useMirroring) {
+        if (list.includes(id)) {
+            // currently active → turn into mirrored
+            mapping[file] = list.map(mid => mid === id ? -id : mid)
+        } else if (list.includes(-id)) {
+            // currently mirrored → remove (none)
+            mapping[file] = list.filter(mid => mid !== -id)
+        } else {
+            // none → add as active
+            mapping[file] = [...list, id]
+        }
     } else {
-        // none → add as active
-        mapping[file] = [...list, id]
+        if (list.includes(id)) {
+            // active → remove
+            mapping[file] = list.filter(mid => mid !== id)
+        } else {
+            // none → add as active
+            mapping[file] = [...list, id]
+        }
     }
 
     store.commit('SET_MAPPING', mapping)
 }
+
 
 function getState(id) {
     const list = store.state.mapping[props.dialogData.fileName] || []
@@ -56,12 +69,12 @@ function getState(id) {
     <v-dialog :model-value="modelValue" max-width="500" @update:modelValue="$emit('update:modelValue', $event)">
         <v-card>
             <v-card-title class="text-center">
-                Assign <span class="text-primary">{{dialogData.fileName}}</span> To Modules
+                Assign <span class="text-primary">{{ dialogData.fileName }}</span> To Modules
             </v-card-title>
             <v-card-text>
                 <div class="d-flex justify-center mb-4 pb-4 border-b-thin">
                     <div class="pa-1 text-caption mr-2 legend active">Assigned</div>
-                    <div class="pa-1 text-caption mr-2 legend mirrored">Mirrored</div>
+                    <div class="pa-1 text-caption mr-2 legend mirrored" v-if="useMirroring">Mirrored</div>
                     <div class="pa-1 text-caption mr-2 legend unassigned">Unassigned</div>
                 </div>
                 <svg id="nam-map" data-name="nam-map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 753.14 457.27"

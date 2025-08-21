@@ -68,7 +68,7 @@ function extractDefaultMapping(fileName) {
   const numbers = digits.match(/.{2}/g) || []
   const assignedIds = numbers.map(n => {
     n = parseInt(n.trim())
-    if (mirroredMappings.includes(n)) return -1 * n
+    // if (mirroredMappings.includes(n)) return -1 * n
     return n
   })
   return assignedIds
