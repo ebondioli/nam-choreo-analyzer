@@ -7,6 +7,7 @@ const props = defineProps({
     unit: String,
     limits: Object
 })
+
 defineEmits(['update:modelValue'])
 </script>
 
@@ -21,12 +22,12 @@ defineEmits(['update:modelValue'])
                     <v-list-item v-for="(interval, idx) in dialogData.frames" :key="idx">
                         <template v-if="interval[0] === interval[1]">
                             Frame {{ interval[0] }} ({{ frameToTimestamp(interval[0]) }}) — <span class="red--text"> {{
-                                interval[2].toFixed(2) }} {{unit}}</span> (max {{ limits.speed || limits.accel }} {{unit}})
+                                interval[2].toFixed(2) }} {{unit}}</span> (max {{ limits[dialogData.type] }} {{unit}})
                         </template>
                         <template v-else>
                             Frames {{ interval[0] }} - {{ interval[1] }}
                             ({{ frameToTimestamp(interval[0]) }} → {{ frameToTimestamp(interval[1]) }})
-                            — <span class="red--text">{{ interval[2].toFixed(2) }} {{unit}}</span> (max {{ limits.speed || limits.accel }} {{unit}})
+                            — <span class="red--text">{{ interval[2].toFixed(2) }} {{unit}}</span> (max {{ limits[dialogData.type] }} {{unit}})
                         </template>
                     </v-list-item>
                 </v-list>

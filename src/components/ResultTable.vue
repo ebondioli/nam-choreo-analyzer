@@ -123,7 +123,7 @@ function openMappingDialog(result) {
             </td>
             <td class="accel-cell">{{ item.accelTime }}</td>
             <td class="accel-cell">
-              <v-btn small text @click="openLimitsDialog(item.column, 'acceleration', item.exceededAccelFrames)">
+              <v-btn small text @click="openLimitsDialog(item.column, 'accel', item.exceededAccelFrames)">
                 {{ item.accelFrame }}
               </v-btn>
             </td>
