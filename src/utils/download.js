@@ -49,9 +49,8 @@ export function createFullChoreography(results, mapping) {
     Object.entries(mapping).forEach(([fileName, indices]) => {
         indices.forEach(idx => {
             const mirror = idx < 0
-            idx = Math.abs(idx)
-            // idx -= 1
-            headers.push(`${idx * 3}`, `${idx * 3 + 1}`, `${idx * 3 + 2}`)
+            idx = Math.abs(idx) // keep 1-based
+            headers.push(`${(idx - 1) * 3 + 1}`, `${(idx - 1) * 3 + 2}`, `${(idx - 1) * 3 + 3}`)
             orderedModules.push({ idx, fileName, mirror })
         })
     })
