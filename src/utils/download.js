@@ -1,3 +1,5 @@
+const use0BasedIDs = true;
+
 function interpolateFrames(frames, valueFn) {
     const rows = []
     frames.forEach((frame, i) => {
@@ -50,7 +52,13 @@ export function createFullChoreography(results, mapping) {
         indices.forEach(idx => {
             const mirror = idx < 0
             idx = Math.abs(idx) // keep 1-based
-            headers.push(`${(idx - 1) * 3 + 1}`, `${(idx - 1) * 3 + 2}`, `${(idx - 1) * 3 + 3}`)
+            if (use0BasedIDs) {
+                idx = Math.abs(idx)
+                idx -= 1
+                headers.push(`${idx * 3}`, `${idx * 3 + 1}`, `${idx * 3 + 2}`)
+            } else {
+                headers.push(`${(idx - 1) * 3 + 1}`, `${(idx - 1) * 3 + 2}`, `${(idx - 1) * 3 + 3}`)
+            }
             orderedModules.push({ idx, fileName, mirror })
         })
     })
