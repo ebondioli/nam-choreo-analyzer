@@ -12,7 +12,10 @@ export function parseSection(data, sectionName) {
   const frames = new Map()
   while ((frameMatch = frameRegex.exec(sectionText)) !== null) {
     const frameNum = parseInt(frameMatch[1], 10)
-    const value = parseFloat(frameMatch[2])
+    let value = parseFloat(frameMatch[2])
+    if (sectionName === 'Rotation_Structure') {
+      value *= -1
+    }
     frames.set(frameNum, value)
   }
   return frames
